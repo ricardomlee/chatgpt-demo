@@ -17,6 +17,7 @@ export default () => {
   const [loading, setLoading] = createSignal(false)
   const [controller, setController] = createSignal<AbortController>(null)
   const [isStick, setStick] = createSignal(false)
+  const [isMuted, setMuted] = createSignal(false)
 
   createEffect(() => (isStick() && smoothToBottom()))
 
@@ -121,6 +122,7 @@ export default () => {
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
+      let read_position = 0
 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
@@ -131,6 +133,19 @@ export default () => {
 
           if (char)
             setCurrentAssistantMessage(currentAssistantMessage() + char)
+          
+          let unread = currentAssistantMessage().substring(read_position)
+          if (!isMuted() && /[.!?。！？\n]$/.test(unread)) {
+            const msg = new SpeechSynthesisUtterance(unread)
+            if(/[\u4e00-\u9fa5]/.test(unread))
+              msg.lang = "zh-CN"
+            else
+              msg.lang = "en-US"
+            msg.rate = 1.1
+            msg.pitch = 1.5
+            speechSynthesis.speak(msg)
+            read_position = currentAssistantMessage().length
+          }
 
           isStick() && instantToBottom()
         }
@@ -252,6 +267,9 @@ export default () => {
           </button>
           <button title="Clear" onClick={clear} disabled={systemRoleEditing()} gen-slate-btn>
             <IconClear />
+          </button>
+          <button title="Mute/Unmute" onClick={() => setMuted(!isMuted())} disabled={systemRoleEditing()} gen-slate-btn>
+            {isMuted() ? '🔉' : '🤫'}
           </button>
         </div>
       </Show>
