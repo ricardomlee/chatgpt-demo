@@ -31,11 +31,11 @@ export default () => {
     })
 
     try {
-      if (localStorage.getItem('messageList'))
-        setMessageList(JSON.parse(localStorage.getItem('messageList')))
+      if (sessionStorage.getItem('messageList'))
+        setMessageList(JSON.parse(sessionStorage.getItem('messageList')))
 
-      if (localStorage.getItem('systemRoleSettings'))
-        setCurrentSystemRoleSettings(localStorage.getItem('systemRoleSettings'))
+      if (sessionStorage.getItem('systemRoleSettings'))
+        setCurrentSystemRoleSettings(sessionStorage.getItem('systemRoleSettings'))
 
       if (localStorage.getItem('stickToBottom') === 'stick')
         setStick(true)
@@ -50,8 +50,8 @@ export default () => {
   })
 
   const handleBeforeUnload = () => {
-    localStorage.setItem('messageList', JSON.stringify(messageList()))
-    localStorage.setItem('systemRoleSettings', currentSystemRoleSettings())
+    sessionStorage.setItem('messageList', JSON.stringify(messageList()))
+    sessionStorage.setItem('systemRoleSettings', currentSystemRoleSettings())
     isStick() ? localStorage.setItem('stickToBottom', 'stick') : localStorage.removeItem('stickToBottom')
   }
 
@@ -173,7 +173,9 @@ export default () => {
       setCurrentAssistantMessage('')
       setLoading(false)
       setController(null)
-      inputRef.focus()
+      // Disable auto-focus on touch devices
+      if (!('ontouchstart' in document.documentElement || navigator.maxTouchPoints > 0))
+        inputRef.focus()
     }
   }
 
@@ -197,7 +199,6 @@ export default () => {
       const lastMessage = messageList()[messageList().length - 1]
       if (lastMessage.role === 'assistant')
         setMessageList(messageList().slice(0, -1))
-
       requestWithLatestMessage()
     }
   }
