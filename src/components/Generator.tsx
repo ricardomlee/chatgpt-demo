@@ -17,7 +17,7 @@ export default () => {
   const [loading, setLoading] = createSignal(false)
   const [controller, setController] = createSignal<AbortController>(null)
   const [isStick, setStick] = createSignal(false)
-  const [isMuted, setMuted] = createSignal(false)
+  const [isMuted, setMuted] = createSignal(ture)
 
   createEffect(() => (isStick() && smoothToBottom()))
 
